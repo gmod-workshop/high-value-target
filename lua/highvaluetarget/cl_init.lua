@@ -156,6 +156,8 @@ end
 function hvt.UpdatePanel(group)
   local GROUP = hvt.Panels[group]
 
+  if not GROUP then hvt.BuildPanel(group) end
+
   local FRAME, COUNT = GROUP["MAIN"], GROUP["COUNT"]
 
   if not cvars.Bool("hvt_hud_enabled", true) then

@@ -14,8 +14,8 @@ include("hook.lua")
 -- @tparam string class The class of the entity
 -- @return Returns the associated name of the group or nil
 function hvt.GetTargetGroup(class)
-  for group, classes in pairs(hvt.Config.Groups) do
-    for _, target in ipairs(classes) do
+  for group, config in pairs(hvt.Config.Groups) do
+    for _, target in ipairs(config.Classes or {}) do
       if string.lower(target) == string.lower(class or "") then return group end
     end
   end
@@ -36,10 +36,16 @@ function hvt.GetTargetCount(group)
 end
 
 function hvt.UpdateGroupCounts()
-  for group, classes in pairs(hvt.Config.Groups) do
+  for group, config in pairs(hvt.Config.Groups) do
     local count = 0
-    for _, class in ipairs(classes) do
+    for _, class in ipairs(config.Classes or {}) do
       count = count + #ents.FindByClass(class)
+    end
+
+    if config.CustomCheck then
+      for _, ent in ipairs(ents.GetAll()) do
+        if config.CustomCheck(ent) then count = count + 1 end
+      end
     end
 
     hvt.Targets[group] = count

@@ -7,7 +7,7 @@ end)
 local function UpdateGroups()
   hvt.UpdateGroupCounts()
 
-  if CLIENT then hvt.Update() end
+  hvt.Update()
 end
 
 hook.Add("OnEntityCreated", "HVT.OnEntityCreated", UpdateGroups)
