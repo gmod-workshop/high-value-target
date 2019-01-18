@@ -15,18 +15,6 @@ hook.Add("EntityRemoved", "HVT.EntityRemoved", UpdateGroups)
 
 if CLIENT then
   hook.Add("PopulateToolMenu", "HVT.PopulateToolMenu", function()
-    spawnmenu.AddToolMenuOption("Utilities", "High Value Target", "HVTSVSettings", "Server Settings", "", "", function(panel)
-      panel:Help("Server Settings")
-
-      panel:AddControl("ComboBox", {
-        MenuButton = 1,
-        Folder = "util_hvt_sv",
-        Options = {
-          ["#preset.default"] = {}
-        }
-      })
-    end)
-
     spawnmenu.AddToolMenuOption("Utilities", "High Value Target", "HVTCLSettings", "Client Settings", "", "", function(panel)
       panel:Help("Client Settings")
 
