@@ -11,6 +11,7 @@ include("config.lua")
 -- Convenience functions
 
 --- Retrieve a value from the configuration.
+-- @shared
 -- @tparam string key The key to search for, this can include a sub-key as well (i.e HUD.Scale)
 -- @param default A fallback default value in case the key is not found
 -- @return The retrieved value or the fallback default if not found
@@ -32,7 +33,10 @@ function hvt.GetConfig(key, default)
   return Either(tbl ~= nil, tbl, default)
 end
 
----
+--- Get the group name for a given entity class.
+-- @shared
+-- @tparam string class The class of the entity
+-- @return Returns the associated name of the group or nil
 function hvt.GetTargetGroup(class)
   for group, classes in pairs(hvt.Config.Groups) do
     for _, target in ipairs(classes) do
@@ -43,6 +47,9 @@ function hvt.GetTargetGroup(class)
   return nil
 end
 
+--- Get the count for an entity group.
+-- @tparam string The name of the group
+-- @return Returns the group count or 0
 function hvt.GetGroupCount(group)
   group = hvt.Targets[group] or hvt.GetTargetGroup(class)
 

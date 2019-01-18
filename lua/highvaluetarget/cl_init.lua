@@ -55,6 +55,8 @@ end
 
 -- Panel Creation
 
+--- Initialize the HUD for the system.
+-- @client
 function hvt.Initialize()
   hvt.Panels = hvt.Panels or {}
 
@@ -66,6 +68,9 @@ function hvt.Initialize()
   end
 end
 
+--- Get the parent panel for the HUD.
+-- @client
+-- @return The root panel of the HUD
 function hvt.GetParent()
   if IsValid(hvt.ParentPanel) then return hvt.ParentPanel end
 
@@ -189,7 +194,7 @@ function hvt.UpdatePanel(group)
   hvt.UpdateParent()
 end
 
---- Reconstruct the HVT panel.
+--- Reconstruct the HVT panel for a group
 -- @client
 -- @return The counter panel object
 function hvt.BuildPanel(group)
