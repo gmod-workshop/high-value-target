@@ -32,6 +32,7 @@ cvars.AddChangeCallback("hvt_hud_enabled", hvt.Update)
 cvars.AddChangeCallback("hvt_hud_x", hvt.Update)
 cvars.AddChangeCallback("hvt_hud_y", hvt.Update)
 cvars.AddChangeCallback("hvt_hud_scale", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_fade", hvt.Update)
 
 cvars.AddChangeCallback("hvt_hud_r", hvt.Update)
 cvars.AddChangeCallback("hvt_hud_g", hvt.Update)
@@ -72,10 +73,10 @@ end
 -- @client
 -- @return The root panel of the HUD
 function hvt.GetParent()
-  if IsValid(hvt.ParentPanel) then return hvt.ParentPanel end
+  if ispanel(hvt.ParentPanel) then return hvt.ParentPanel end
 
-  if IsValid(hvt.RootPanel) then hvt.RootPanel:Remove() end
-  if IsValid(hvt.ParentPanel) then hvt.ParentPanel:Remove() end
+  if ispanel(hvt.RootPanel) then hvt.RootPanel:Remove() end
+  if ispanel(hvt.ParentPanel) then hvt.ParentPanel:Remove() end
 
   local PANEL = vgui.Create("DFrame")
   PANEL:SetTitle("")
@@ -100,12 +101,14 @@ function hvt.GetParent()
   return LAYOUT
 end
 
+--- Updates the parent panel that contains the other panels.
+-- @client
 function hvt.UpdateParent()
   local PARENT = hvt.GetParent()
 
   local count = 0
   for k, v in pairs(hvt.Panels) do
-    if IsValid(v["MAIN"]) then count = count + 1 end
+    if ispanel(v["MAIN"]) then count = count + 1 end
   end
 
   local scale = cvars.Number("hvt_hud_scale", 1.0)
@@ -119,17 +122,21 @@ end
 function hvt.Update()
   for group in pairs(hvt.Config.Groups) do
     hvt.UpdatePanel(group)
+
+    if hvt.GetTargetCount(group) <= 0 then
+      hvt.FadePanel(group)
+    end
   end
 end
 
 function hvt.FadePanel(group)
-  if not (hvt.Panels[group] and IsValid(hvt.Panels[group]["MAIN"])) then return end
+  if not (hvt.Panels[group] and ispanel(hvt.Panels[group]["MAIN"])) then return end
   if not cvars.Bool("hvt_hud_fade") then return end
 
   hvt.Panels[group]["MAIN"]:AlphaTo(0, 0.5, 0, function(tbl, pnl)
-    if hvt.Targets[group] == 0 then
+    if hvt.GetTargetCount(group) <= 0 then
       hvt.ClearPanel(group)
-    elseif IsValid(pnl) then
+    elseif ispanel(pnl) then
       pnl:AlphaTo(cvars.Number("hvt_hud_font_a"), 0.1, 0)
     end
   end)
@@ -138,7 +145,7 @@ end
 function hvt.ClearPanel(group)
   hvt.Panels[group] = hvt.Panels[group] or {}
   for k, v in pairs(hvt.Panels[group] or {}) do
-    if IsValid(v) then v:Remove() end
+    if ispanel(v) then v:Remove() end
 
     hvt.Panels[group] = {}
   end
@@ -155,21 +162,22 @@ function hvt.UpdatePanel(group)
     return hvt.ClearPanel(group)
   end
 
-  if not (IsValid(FRAME) and IsValid(COUNT)) then hvt.BuildPanel(group) end
+  if not (ispanel(FRAME) and ispanel(COUNT)) then hvt.BuildPanel(group) end
 
   FRAME, COUNT = hvt.Panels[group]["MAIN"], hvt.Panels[group]["COUNT"]
 
-  if not (IsValid(FRAME) and IsValid(COUNT)) then return end
+  if not (ispanel(FRAME) and ispanel(COUNT)) then return end
 
   local current = tonumber(COUNT:GetText())
-  local count = hvt.GetGroupCount(group)
+  local count = hvt.GetTargetCount(group)
 
   if current ~= count then
     COUNT:SetText(tostring(count))
 
     if cvars.Bool("hvt_hud_flash") then
+      local color = FRAME:GetColor()
       FRAME:ColorTo(Color(255, 0, 0, 100), 0.1, 0, function()
-        FRAME:ColorTo(Color(cvars.Number("hvt_hud_r"), cvars.Number("hvt_hud_g"), cvars.Number("hvt_hud_b"),  cvars.Number("hvt_hud_a")), 0.1, 0)
+        FRAME:ColorTo(color, 0.1, 0)
       end)
     end
   end
@@ -200,14 +208,14 @@ end
 function hvt.BuildPanel(group)
   if not cvars.Bool("hvt_hud_enabled", true) then return end
 
-  if not hvt.Targets[group] or hvt.Targets[group] <= 0 then return end
+  if hvt.GetTargetCount(group) <= 0 then return end
 
   local broken = false
   for _, name in ipairs({ "MAIN", "TITLE", "COUNT" }) do
-    if not IsValid(hvt.Panels[group][name]) then broken = true break end
+    if not ispanel(hvt.Panels[group][name]) then broken = true break end
   end
 
-  if not broken then return end
+  if not broken then return hvt.Panels[group]["MAIN"] end
 
   hvt.ClearPanel(group)
 
@@ -241,7 +249,7 @@ function hvt.BuildPanel(group)
   local COUNT = FRAME:Add("DLabel")
   COUNT:SetFont("HVT.Group72")
   COUNT:SetTextColor(text_color)
-  COUNT:SetText(hvt.GetGroupCount(group))
+  COUNT:SetText(hvt.GetTargetCount(group))
   COUNT:SetContentAlignment(5)
   COUNT:CenterHorizontal()
   COUNT:Dock(FILL)
@@ -252,72 +260,3 @@ function hvt.BuildPanel(group)
 
   return FRAME
 end
-
-hvt.Initialize()
-
--- Spawn Menu Settings
-
-hook.Add("PopulateToolMenu", "HVT.PopulateToolMenu", function()
-  spawnmenu.AddToolMenuOption("Utilities", "High Value Target", "HVTSVSettings", "Server Settings", "", "", function(panel)
-    panel:Help("Server Settings")
-
-    panel:AddControl("ComboBox", {
-      MenuButton = 1,
-      Folder = "util_hvt_sv",
-      Options = {
-        ["#preset.default"] = {}
-      }
-    })
-  end)
-
-  spawnmenu.AddToolMenuOption("Utilities", "High Value Target", "HVTCLSettings", "Client Settings", "", "", function(panel)
-    panel:Help("Client Settings")
-
-    panel:AddControl("ComboBox", {
-      MenuButton = 1,
-      Folder = "util_hvt_cl",
-      Options = {
-        ["#preset.default"] = {}
-      }
-    })
-
-    panel:Help("General HUD Settings")
-
-    panel:CheckBox("HUD Enabled", "hvt_hud_enabled")
-    panel:CheckBox("HUD Fade", "hvt_hud_fade")
-    panel:CheckBox("HUD Flash", "hvt_hud_flash")
-
-    panel:NumSlider("HUD X", "hvt_hud_x", 0, 100, 0)
-    panel:NumSlider("HUD Y", "hvt_hud_y", 0, 100, 0)
-
-    panel:NumSlider("HUD Scale", "hvt_hud_scale", 0.0, 5.0, 1)
-
-    do
-      panel:Help("Background Color")
-
-      local color = vgui.Create("DColorMixer")
-      color:SetConVarR("hvt_hud_r")
-      color:SetConVarG("hvt_hud_g")
-      color:SetConVarB("hvt_hud_b")
-      color:SetConVarA("hvt_hud_a")
-
-      panel:AddItem(color)
-    end
-
-    do
-      panel:Help("Font Color")
-
-      local color = vgui.Create("DColorMixer")
-      color:SetConVarR("hvt_hud_font_r")
-      color:SetConVarG("hvt_hud_font_g")
-      color:SetConVarB("hvt_hud_font_b")
-      color:SetConVarA("hvt_hud_font_a")
-
-      panel:AddItem(color)
-    end
-  end)
-end)
-
-hook.Add("AddToolMenuCategories", "HVT.AddToolMenuCategories", function()
-  spawnmenu.AddToolCategory("Utilities", "High Value Target", "High Value Target")
-end)

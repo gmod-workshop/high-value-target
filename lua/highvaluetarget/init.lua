@@ -1,4 +1,5 @@
 AddCSLuaFile("config.lua")
+AddCSLuaFile("hook.lua")
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 
