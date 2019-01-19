@@ -27,23 +27,6 @@ CreateClientConVar("hvt_hud_font_g", "255", true, false, "The green value of the
 CreateClientConVar("hvt_hud_font_b", "255", true, false, "The blue value of the HVT HUD font (0 - 255)")
 CreateClientConVar("hvt_hud_font_a", "255", true, false, "The alpha value of the HVT HUD font (0 - 255)")
 
-cvars.AddChangeCallback("hvt_hud_enabled", hvt.Update)
-
-cvars.AddChangeCallback("hvt_hud_x", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_y", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_scale", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_fade", hvt.Update)
-
-cvars.AddChangeCallback("hvt_hud_r", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_g", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_b", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_a", hvt.Update)
-
-cvars.AddChangeCallback("hvt_hud_font_r", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_font_g", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_font_b", hvt.Update)
-cvars.AddChangeCallback("hvt_hud_font_a", hvt.Update)
-
 -- Font Creation
 
 for i = 8, 96, 8 do
@@ -262,3 +245,20 @@ function hvt.BuildPanel(group)
 
   return FRAME
 end
+
+cvars.AddChangeCallback("hvt_hud_enabled", hvt.Update)
+
+cvars.AddChangeCallback("hvt_hud_x", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_y", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_scale", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_fade", hvt.Update)
+
+cvars.AddChangeCallback("hvt_hud_r", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_g", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_b", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_a", hvt.Update)
+
+cvars.AddChangeCallback("hvt_hud_font_r", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_font_g", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_font_b", hvt.Update)
+cvars.AddChangeCallback("hvt_hud_font_a", hvt.Update)
